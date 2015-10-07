@@ -84,7 +84,7 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
         fX.addView(twEquals);
         customLayout.addView(fX);
         Button btProcess = new Button(this);
-        btProcess.setText("Вирішити");
+        btProcess.setText("Розв'язати");
         btProcess.setOnClickListener(this);
         customLayout.addView(btProcess);
         ((ScrollView) findViewById(R.id.scrollView)).addView(customLayout);
