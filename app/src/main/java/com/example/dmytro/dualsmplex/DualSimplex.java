@@ -1,8 +1,5 @@
 package com.example.dmytro.dualsmplex;
 
-import android.content.Context;
-import android.support.v7.app.AlertDialog;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +30,6 @@ public class DualSimplex {
         convert_enter_data(signs);
         make_opinions(_koef_of_function);
         processing();
-//        free_vars = _free_vars;
-//        for(int i = 0; i < LIMIT_COUNT; i++){
-//            for(int j = 0; j < VAR_COUNT; j++){
-//
-//            }
-//        }
     }
 
     private void convert_enter_data(List<String> signs) {

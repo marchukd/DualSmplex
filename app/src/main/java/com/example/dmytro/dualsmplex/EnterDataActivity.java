@@ -1,14 +1,17 @@
 package com.example.dmytro.dualsmplex;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
     private ArrayList<List<Fraction>> koef_limits;
     private List<Fraction> free_vars;
     private List<Fraction> koef_of_func;
+    private List<String> signs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +51,13 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
                 ew1.setHint("x" + (j + 1));
                 left.addView(ew1);
             }
-            TextView twEquals = new TextView(this);
-            twEquals.setText("=");
-            left.addView(twEquals);
+            //spinner
+            Spinner spinner = new Spinner(this);
+            String[] items = {">=", "<="};
+            spinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+            spinner.setLayoutParams(new ActionBar.LayoutParams(110, 60));
+            left.addView(spinner);
+            //end spinner
             EditText freeVar = new EditText(this);
             freeVar.setHint("в.ч.");
             left.addView(freeVar);
@@ -69,10 +77,14 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
         }
         TextView tw = new TextView(this);
         tw.setText("->");
+        tw.setLayoutParams(new ActionBar.LayoutParams(110, 60));
         fX.addView(tw);
         TextView twEquals = new TextView(this);
         twEquals.setText("min");
         fX.addView(twEquals);
+        Spinner spinner = new Spinner(this);
+
+        //end spinner min or max
         customLayout.addView(fX);
         Button btProcess = new Button(this);
         btProcess.setText("Розв'язати");
@@ -83,114 +95,47 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
+        koef_limits.clear();
+        free_vars.clear();
+        koef_of_func.clear();
+        List<String> signs = new ArrayList<>();
+
         for (int i = 1; i < customLayout.getChildCount() - 1; i++) {
-            Log.d("ITEM", i + "");
             if (i == customLayout.getChildCount() - 3) continue;
-            LinearLayout row = (LinearLayout) customLayout.getChildAt(i);
-            List<Fraction> list_row = new ArrayList<>();
-            for (int j = 0; j < row.getChildCount(); j++) {
-                if (j == row.getChildCount() - 2 || (j == row.getChildCount() - 1 && i == customLayout.getChildCount() - 2))
-                    continue;
-                EditText closet = (EditText) row.getChildAt(j);
-                if (i == customLayout.getChildCount() - 2) {
-                    koef_of_func.add(new Fraction(Fraction.parse(closet.getText().toString())));
-                    continue;
+            if (i == customLayout.getChildCount() - 2) {
+                LinearLayout func_values = (LinearLayout) customLayout.getChildAt(i);
+                for (int j = 0; j < func_values.getChildCount() - 2; j++) {
+                    EditText editText = (EditText) func_values.getChildAt(j);
+                    koef_of_func.add(new Fraction(Fraction.parse(editText.getText().toString())));
                 }
-                if (j == row.getChildCount() - 1) {
-                    free_vars.add(new Fraction(Fraction.parse(closet.getText().toString())));
-                    continue;
-                }
-                list_row.add(new Fraction(Fraction.parse(closet.getText().toString())));
+                continue;
             }
-            if (list_row.size() != 0)
-                koef_limits.add(list_row);
+            LinearLayout linearLayout = (LinearLayout) customLayout.getChildAt(i);
+            List<Fraction> row = new ArrayList<>();
+            for (int j = 0; j < linearLayout.getChildCount(); j++) {
+                System.out.println(linearLayout.getChildAt(j));
+                if (j == linearLayout.getChildCount() - 1) {
+                    EditText editText = (EditText) linearLayout.getChildAt(j);
+                    free_vars.add(new Fraction(Fraction.parse(editText.getText().toString())));
+                    continue;
+                }
+                if (j == linearLayout.getChildCount() - 2) {
+                    Spinner sp = (Spinner) linearLayout.getChildAt(j);
+                    signs.add(sp.getSelectedItem().toString());
+                    continue;
+                }
+                EditText editText = (EditText) linearLayout.getChildAt(j);
+                row.add(new Fraction(Fraction.parse(editText.getText().toString())));
+            }
+            koef_limits.add(row);
         }
+        this.signs = signs;
         start_process();
     }
 
     private void start_process() {
-        ArrayList<List<Fraction>> t_koef_limits = new ArrayList<>();
-        List<Fraction> row1 = new ArrayList<>();
-        row1.add(new Fraction(1, 1));
-        row1.add(new Fraction(2, 1));
-        row1.add(new Fraction(-1, 1));
-        row1.add(new Fraction(0, 1));
-        t_koef_limits.add(row1);
-        List<Fraction> row2 = new ArrayList<>();
-        row2.add(new Fraction(2, 1));
-        row2.add(new Fraction(1, 1));
-        row2.add(new Fraction(1, 1));
-        row2.add(new Fraction(1, 1));
-        t_koef_limits.add(row2);
-        List<Fraction> t_free_vars = Arrays.asList(new Fraction(3, 1), new Fraction(2, 1));
-        List<Fraction> t_koef_of_func = new ArrayList<>();
-        t_koef_of_func.add(new Fraction(6, 1));
-        t_koef_of_func.add(new Fraction(8, 1));
-        t_koef_of_func.add(new Fraction(1, 1));
-        t_koef_of_func.add(new Fraction(1, 1));
-        List<String> t_signs = Arrays.asList(new String(">="), new String(">="));
-        DualSimplex dualSimplex = new DualSimplex(t_koef_limits, t_free_vars, t_koef_of_func, t_signs);
-        /*checkBazis();
-        for (int i = 0; i < VAR_COUNT; i++)
-            opinions[i] = koef_function[i].multiply(new Fraction(-1, 1));
-        while (isNegativeFreeVar()) {
-            if (isEmptyMPR()) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("МПР - порожня");
-                builder.create().show();
-                return;
-            }
-            //мін з вільних членів
-            Fraction min = free_vars[0];
-            int exit = 0;
-            for (int i = 0; i < free_vars.length; i++)
-                if (free_vars[i].compare(min) == -1) {
-                    min = free_vars[i];
-                    exit = i;
-                }
-            Fraction min_of_relations = null;
-            int enter = 0;
-            for (int i = 0; i < VAR_COUNT; i++) {
-                if (koef_limits[exit][i].compare(new Fraction(0, 1)) == -1)
-                    if (min_of_relations == null) {
-                        min_of_relations = opinions[i].divide(koef_limits[exit][i]);
-                        enter = i + 1;
-                    } else if (min_of_relations.compare(opinions[i].divide(koef_limits[exit][i])) == 1) {
-                        min_of_relations = opinions[i].divide(koef_limits[exit][i]);
-                        enter = i + 1;
-                    }
-            }
-            bazis[exit] = String.valueOf(enter);
-            Fraction element = koef_limits[exit][enter - 1];
-            for (int i = 0; i < VAR_COUNT; i++)
-                koef_limits[exit][i] = koef_limits[exit][i].divide(element);
-            free_vars[exit] = free_vars[exit].divide(element);
-            for (int i = 0; i < LIM_COUNT; i++) {
-                if (i == exit) continue;
-                if (koef_limits[i][enter - 1].compare(new Fraction(0, 1)) == 0) continue;
-                Fraction divider = koef_limits[i][enter - 1].multiply(new Fraction(-1, 1));
-                for (int j = 0; j < VAR_COUNT; j++)
-                    koef_limits[i][j] = koef_limits[exit][j].multiply(divider).plus(koef_limits[i][j]);
-                free_vars[i] = free_vars[exit].multiply(divider).plus(free_vars[i]);
-            }
-            Fraction divider = opinions[enter - 1].multiply(new Fraction(-1, 1));
-            for (int i = 0; i < VAR_COUNT; i++)
-                opinions[i] = koef_limits[exit][i].multiply(divider).plus(opinions[i]);
-            value_of_function = free_vars[exit].multiply(divider).plus(value_of_function);
-        }
-        StringBuilder result = new StringBuilder("x*(");
-        Fraction[] coords = new Fraction[VAR_COUNT];
-        for (int i = 0; i < VAR_COUNT; i++)
-            coords[i] = new Fraction(0, 1);
-        for (int i = 0; i < LIM_COUNT; i++)
-            coords[Integer.valueOf(bazis[i]) - 1] = free_vars[i];
-
-        for (int i = 0; i < VAR_COUNT; i++)
-            result.append(coords[i] + "; ");
-        result = new StringBuilder(result.substring(0, result.length() - 2));
-        result.append("); f(x*)=" + value_of_function);
+        DualSimplex dualSimplex = new DualSimplex(koef_limits, free_vars, koef_of_func, signs);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(result);
-        builder.create().show();*/
+        builder.setMessage(dualSimplex.getResultat()).create().show();
     }
 }
