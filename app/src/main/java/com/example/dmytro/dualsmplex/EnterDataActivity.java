@@ -12,20 +12,16 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class EnterDataActivity extends AppCompatActivity implements View.OnClickListener {
     LinearLayout customLayout;
     private int VAR_COUNT;
     private int LIM_COUNT;
-    private Fraction[][] koef_limits;
-    private String[] bazis;
-    private Fraction[] free_vars;
-    private Fraction[] opinions;
-    private Fraction[] koef_function;
-    private int[] signs_of_inequality;
-    private Fraction value_of_function;
-    public static int GREATER_OR_EQUAL = 0;
-    public static int LESS_THAN_OR_EQUAL = 1;
+    private ArrayList<List<Fraction>> koef_limits;
+    private List<Fraction> free_vars;
+    private List<Fraction> koef_of_func;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,14 +29,9 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
         setContentView(R.layout.activity_enter_data);
         VAR_COUNT = getIntent().getIntExtra("VAR_COUNT", 3);
         LIM_COUNT = getIntent().getIntExtra("LIM_COUNT", 3);
-        koef_limits = new Fraction[LIM_COUNT][VAR_COUNT];
-        signs_of_inequality = new int[LIM_COUNT];
-        free_vars = new Fraction[LIM_COUNT];
-        koef_function = new Fraction[VAR_COUNT];
-        bazis = new String[LIM_COUNT];
-        opinions = new Fraction[VAR_COUNT];
-        value_of_function = new Fraction(0, 1);
-
+        koef_limits = new ArrayList<>();
+        free_vars = new ArrayList<>();
+        koef_of_func = new ArrayList<>();
 
         customLayout = new LinearLayout(this);
         customLayout.setOrientation(LinearLayout.VERTICAL);
@@ -92,34 +83,54 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        LinearLayout col;
-        int index = 0;
-        int index_in_opinions = 0;
         for (int i = 1; i < customLayout.getChildCount() - 1; i++) {
             Log.d("ITEM", i + "");
             if (i == customLayout.getChildCount() - 3) continue;
             LinearLayout row = (LinearLayout) customLayout.getChildAt(i);
+            List<Fraction> list_row = new ArrayList<>();
             for (int j = 0; j < row.getChildCount(); j++) {
                 if (j == row.getChildCount() - 2 || (j == row.getChildCount() - 1 && i == customLayout.getChildCount() - 2))
                     continue;
                 EditText closet = (EditText) row.getChildAt(j);
                 if (i == customLayout.getChildCount() - 2) {
-                    koef_function[index_in_opinions++] = new Fraction(Fraction.parse(closet.getText().toString()));
+                    koef_of_func.add(new Fraction(Fraction.parse(closet.getText().toString())));
                     continue;
                 }
                 if (j == row.getChildCount() - 1) {
-                    free_vars[index] = new Fraction(Fraction.parse(closet.getText().toString()));
+                    free_vars.add(new Fraction(Fraction.parse(closet.getText().toString())));
                     continue;
                 }
-                koef_limits[index][j] = new Fraction(Fraction.parse(closet.getText().toString()));
+                list_row.add(new Fraction(Fraction.parse(closet.getText().toString())));
             }
-            index++;
+            if (list_row.size() != 0)
+                koef_limits.add(list_row);
         }
         start_process();
     }
 
     private void start_process() {
-        checkBazis();
+        ArrayList<List<Fraction>> t_koef_limits = new ArrayList<>();
+        List<Fraction> row1 = new ArrayList<>();
+        row1.add(new Fraction(1, 1));
+        row1.add(new Fraction(2, 1));
+        row1.add(new Fraction(-1, 1));
+        row1.add(new Fraction(0, 1));
+        t_koef_limits.add(row1);
+        List<Fraction> row2 = new ArrayList<>();
+        row2.add(new Fraction(2, 1));
+        row2.add(new Fraction(1, 1));
+        row2.add(new Fraction(1, 1));
+        row2.add(new Fraction(1, 1));
+        t_koef_limits.add(row2);
+        List<Fraction> t_free_vars = Arrays.asList(new Fraction(3, 1), new Fraction(2, 1));
+        List<Fraction> t_koef_of_func = new ArrayList<>();
+        t_koef_of_func.add(new Fraction(6, 1));
+        t_koef_of_func.add(new Fraction(8, 1));
+        t_koef_of_func.add(new Fraction(1, 1));
+        t_koef_of_func.add(new Fraction(1, 1));
+        List<String> t_signs = Arrays.asList(new String(">="), new String(">="));
+        DualSimplex dualSimplex = new DualSimplex(t_koef_limits, t_free_vars, t_koef_of_func, t_signs);
+        /*checkBazis();
         for (int i = 0; i < VAR_COUNT; i++)
             opinions[i] = koef_function[i].multiply(new Fraction(-1, 1));
         while (isNegativeFreeVar()) {
@@ -180,66 +191,6 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
         result.append("); f(x*)=" + value_of_function);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(result);
-        builder.create().show();
-    }
-
-    private boolean checkBazis() {
-        int count_bazis_vars = 0;
-        int index = 0;
-        for (int i = 0; i < koef_limits[0].length; i++) {
-            int count_1 = 0;
-            int count_0 = 0;
-            for (int j = 0; j < koef_limits.length; j++) {
-                if (koef_limits[j][i].compare(new Fraction(0, 1)) == 0)
-                    count_0++;
-                if (koef_limits[j][i].compare(new Fraction(1, 1)) == 0)
-                    count_1++;
-            }
-            if ((count_0 + count_1) == LIM_COUNT && (count_1 == 1)) {
-                bazis[index++] = String.valueOf(i + 1);
-                count_bazis_vars++;
-            }
-        }
-        return count_bazis_vars == LIM_COUNT;
-    }
-
-    private boolean isNegativeFreeVar() {
-        for (int i = 0; i < free_vars.length; i++)
-            if (free_vars[i].compare(new Fraction(0, 1)) == -1)
-                return true;
-        return false;
-    }
-
-    private boolean isEmptyMPR() {
-        ArrayList<Boolean> isNegativeEl = new ArrayList<Boolean>();
-        for (int i = 0; i < LIM_COUNT; i++) {
-            if (free_vars[i].compare(new Fraction(0, 1)) == -1) {
-                int countNegative = 0;
-                for (int j = 0; j < VAR_COUNT; j++)
-                    if (koef_limits[i][j].compare(new Fraction(0, 1)) == -1)
-                        countNegative++;
-                isNegativeEl.add(countNegative == 0);
-            }
-        }
-        for (Boolean b : isNegativeEl)
-            if (b)
-                return true;
-        return false;
-    }
-
-    void privedennya() {
-        for (int i = 0; i < koef_limits.length; i++)
-            if (signs_of_inequality[i] == GREATER_OR_EQUAL)
-                for (int j = 0; j < koef_limits[i].length; j++)
-                    koef_limits[i][j] = koef_limits[i][j].multiply(new Fraction(-1, 1));
-        for (int count = 0; count < koef_limits.length; count++) {
-            for (int i = 0; i < koef_limits.length; i++) {
-                Fraction[] row = new Fraction[koef_limits[i].length + 1];
-                for (int k = 0; k < koef_limits[i].length; k++)
-                    row[k] = koef_limits[i][k];
-                row[koef_limits[i].length] = i == count ? new Fraction(1, 1) : new Fraction(0, 1);
-                koef_limits[i] = row;
-            }
-        }
+        builder.create().show();*/
     }
 }
