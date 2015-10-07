@@ -1,8 +1,8 @@
 package com.example.dmytro.dualsmplex;
 
 import android.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class EnterDataActivity extends AppCompatActivity implements View.OnClickListener {
     LinearLayout customLayout;
@@ -193,7 +195,7 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
                 if (koef_limits[j][i].compare(new Fraction(1, 1)) == 0)
                     count_1++;
             }
-            if ((count_0 + count_1) == LIM_COUNT) {
+            if ((count_0 + count_1) == LIM_COUNT && (count_1 == 1)) {
                 bazis[index++] = String.valueOf(i + 1);
                 count_bazis_vars++;
             }
@@ -209,15 +211,18 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
     }
 
     private boolean isEmptyMPR() {
-        boolean[] isNegativeEl = new boolean[LIM_COUNT];
+        ArrayList<Boolean> isNegativeEl = new ArrayList<Boolean>();
         for (int i = 0; i < LIM_COUNT; i++) {
-            if (free_vars[i].compare(new Fraction(0, 1)) == -1)
+            if (free_vars[i].compare(new Fraction(0, 1)) == -1) {
+                int countNegative = 0;
                 for (int j = 0; j < VAR_COUNT; j++)
                     if (koef_limits[i][j].compare(new Fraction(0, 1)) == -1)
-                        isNegativeEl[i] = true;
+                        countNegative++;
+                isNegativeEl.add(countNegative == 0);
+            }
         }
-        for (int i = 0; i < LIM_COUNT; i++)
-            if (!isNegativeEl[i])
+        for (Boolean b : isNegativeEl)
+            if (b)
                 return true;
         return false;
     }
