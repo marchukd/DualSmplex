@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 public class EnterDataActivity extends AppCompatActivity implements View.OnClickListener {
     LinearLayout customLayout;
+    //hjgjhg
     private int VAR_COUNT;
     private int LIM_COUNT;
     private Fraction[][] koef_limits;
@@ -198,7 +199,7 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
                 count_bazis_vars++;
             }
         }
-        return count_bazis_vars == LIM_COUNT ? true : false;
+        return count_bazis_vars == LIM_COUNT;
     }
 
     private boolean isNegativeFreeVar() {
@@ -217,7 +218,7 @@ public class EnterDataActivity extends AppCompatActivity implements View.OnClick
                         isNegativeEl[i] = true;
         }
         for (int i = 0; i < LIM_COUNT; i++)
-            if (isNegativeEl[i] == false)
+            if (!isNegativeEl[i])
                 return true;
         return false;
     }
