@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 public class EnterDataActivity extends AppCompatActivity implements View.OnClickListener {
     LinearLayout customLayout;
-    //hjgjhg
     private int VAR_COUNT;
     private int LIM_COUNT;
     private Fraction[][] koef_limits;
