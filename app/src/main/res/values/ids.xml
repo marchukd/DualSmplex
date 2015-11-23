@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="min_or_max" type="id" />
+    <item name="enter_matrix" type="id" />
+    <item name="enter_dest_func" type="id" />
 </resources>
