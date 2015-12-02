@@ -214,6 +214,9 @@ public class GenerationGridActivity extends AppCompatActivity implements Button.
                     builder.setMessage("МПР = порожня множина").show();
                 }
             }
+            if(method.equals(SelectMethodActivity.HOMORI)){
+                simplex = new Simplex(koeficients, free, koef_of_func);
+            }
         }
     }
 }

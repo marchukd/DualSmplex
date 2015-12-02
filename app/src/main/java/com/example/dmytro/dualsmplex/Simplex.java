@@ -3,44 +3,27 @@ package com.example.dmytro.dualsmplex;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Simplex {
-    public static int EMPTY_MPR = -1;
-    public static int OK = 0;
-    public static int TASK_STATE = OK;
+public class Simplex extends BaseMethod {
 
-    private Fraction ZERO = new Fraction(0, 1);
-    private Fraction ONE = new Fraction(1, 1);
-
-    private int VAR_COUNT;
-    private int LIMIT_COUNT;
-
-    private ArrayList<ArrayList<Fraction>> coefOfLimits;
-    private ArrayList<Fraction> coefOfFunction;
-    private ArrayList<Fraction> freeVars;
-    private ArrayList<Fraction> opinions;
-    private ArrayList<Integer> basis;
-    private Fraction valueOfFunction;
-    private Fraction[] resultationPoint;
-
-    public Simplex(ArrayList<ArrayList<Fraction>> _koef_limits, ArrayList<Fraction> _free_vars, ArrayList<Fraction> _koef_of_function) {
-        coefOfLimits = _koef_limits;
-        freeVars = _free_vars;
-        coefOfFunction = _koef_of_function;
-        LIMIT_COUNT = coefOfLimits.size();
-        VAR_COUNT = coefOfLimits.get(0).size();
+    public Simplex(ArrayList<ArrayList<Fraction>> coefOfLimits, ArrayList<Fraction> freeVars, ArrayList<Fraction> coefOfFunction) {
+        this.coefOfLimits = coefOfLimits;
+        this.freeVars = freeVars;
+        this.coefOfFunction = coefOfFunction;
+        LIMIT_COUNT = this.coefOfLimits.size();
+        VAR_COUNT = this.coefOfLimits.get(0).size();
         basis = new ArrayList<>();
         opinions = new ArrayList<>();
         resultationPoint = new Fraction[VAR_COUNT];
 
         initialBasis();
-        initialOpinions(_koef_of_function);
+        initialOpinions(coefOfFunction);
         TASK_STATE = start();
     }
 
     private void initialOpinions(List<Fraction> koef_function) {
-        Fraction _valueOfFunction = new Fraction(ZERO);
+        Fraction _valueOfFunction = new Fraction(Fraction.ZERO);
         for (int i = 0; i < VAR_COUNT; i++) {
-            Fraction itemOpinion = new Fraction(ZERO);
+            Fraction itemOpinion = new Fraction(Fraction.ZERO);
             for (int j = 0; j < LIMIT_COUNT; j++)
                 itemOpinion = itemOpinion.plus(coefOfLimits.get(j).get(i).multiply(coefOfFunction.get(basis.get(j) - 1)));
             opinions.add(itemOpinion.minus(koef_function.get(i)));
@@ -54,9 +37,9 @@ public class Simplex {
         for (int i = 0; i < VAR_COUNT; i++) {
             int zero = 0, one = 0;
             for (int j = 0; j < LIMIT_COUNT; j++)
-                if (coefOfLimits.get(j).get(i).compare(ZERO) == 0)
+                if (coefOfLimits.get(j).get(i).compare(Fraction.ZERO) == 0)
                     zero++;
-                else if (coefOfLimits.get(j).get(i).compare(ONE) == 0)
+                else if (coefOfLimits.get(j).get(i).compare(Fraction.ONE) == 0)
                     one++;
             if (zero + one == LIMIT_COUNT)
                 basis.add(i + 1);
@@ -66,10 +49,10 @@ public class Simplex {
     private int checkOpinions() {
         int posOpinion = 0;
         for (int i = 0; i < VAR_COUNT; i++) {
-            if (opinions.get(i).compare(ZERO) == 1) {
+            if (opinions.get(i).compare(Fraction.ZERO) == 1) {
                 int positive = 0;
                 for (int j = 0; j < LIMIT_COUNT; j++)
-                    if (coefOfLimits.get(j).get(i).compare(ZERO) == 1)
+                    if (coefOfLimits.get(j).get(i).compare(Fraction.ZERO) == 1)
                         positive++;
                 if (positive != 0)
                     posOpinion++;
@@ -92,7 +75,7 @@ public class Simplex {
                 coefOfLimits.get(varOfMinRelation).set(i, coefOfLimits.get(varOfMinRelation).get(i).divide(solutionElement));
             freeVars.set(varOfMinRelation, freeVars.get(varOfMinRelation).divide(solutionElement));
             for (int i = 0; i < LIMIT_COUNT; i++) {
-                if (i == varOfMinRelation || coefOfLimits.get(i).get(varOfMaxOpinion).compare(ZERO) == 0)
+                if (i == varOfMinRelation || coefOfLimits.get(i).get(varOfMaxOpinion).compare(Fraction.ZERO) == 0)
                     continue;
                 oppositeElement = coefOfLimits.get(i).get(varOfMaxOpinion).divide(new Fraction(-1, 1));
                 for (int j = 0; j < VAR_COUNT; j++)
@@ -116,7 +99,7 @@ public class Simplex {
     private int getVarOfMinReation(int maxOpinion) {
         ArrayList<Integer> indexPos = new ArrayList<>();
         for (int i = 0; i < LIMIT_COUNT; i++)
-            if (coefOfLimits.get(i).get(maxOpinion).compare(ZERO) == 1)
+            if (coefOfLimits.get(i).get(maxOpinion).compare(Fraction.ZERO) == 1)
                 indexPos.add(i);
         int startPos = indexPos.get(0);
         Fraction minRelation = freeVars.get(startPos).divide(coefOfLimits.get(startPos).get(maxOpinion));

@@ -3,21 +3,7 @@ package com.example.dmytro.dualsmplex;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DualSimplex {
-    private int VAR_COUNT;
-    private int LIMIT_COUNT;
-
-    public static int EMPTY_MPR = -1;
-    public static int OK = 0;
-    public static int TASK_STATE = OK;
-
-    private ArrayList<ArrayList<Fraction>> coefOfLimits;
-    private ArrayList<Fraction> freeVars;
-    private ArrayList<Fraction> opinions;
-    private Fraction valueOfFunction;
-    private ArrayList<Fraction> coefOfFunction;
-    private ArrayList<Integer> basis;
-    private Fraction[] resultationPoint;
+public class DualSimplex extends BaseMethod {
 
     public DualSimplex(ArrayList<ArrayList<Fraction>> _koef_limits, ArrayList<Fraction> _free_vars, ArrayList<Fraction> _koef_of_function, ArrayList<String> signs) {
         coefOfLimits = _koef_limits;

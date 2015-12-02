@@ -4,6 +4,8 @@ package com.example.dmytro.dualsmplex;
  * Created by Dmytro on 01.10.2015.
  */
 public class Fraction {
+    public static Fraction ZERO = new Fraction(0, 1);
+    public static Fraction ONE = new Fraction(1, 1);
     private int numerator;
     private int denominator;
 
@@ -11,6 +13,10 @@ public class Fraction {
         this.numerator = numerator;
         this.denominator = denominator;
         this.shorten();
+    }
+
+    public Fraction(int numerator) {
+        this(numerator, 1);
     }
 
     public Fraction(Fraction _fr) {
@@ -90,5 +96,15 @@ public class Fraction {
         else
             return new Fraction(0, 1);
 
+    }
+
+    public boolean isInteger() {
+        return (((double) numerator / denominator) - (numerator / denominator)) == 0;
+    }
+
+    public Fraction getDoublePart() {
+        if (this.compare(ZERO) == -1)
+            return new Fraction(new Fraction(denominator, denominator).plus(this));
+        return new Fraction(numerator % denominator, denominator);
     }
 }
