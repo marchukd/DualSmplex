@@ -2,17 +2,12 @@ package com.example.dmytro.dualsmplex;
 
 import java.util.ArrayList;
 
-/**
- * Created by Dmytro on 02.12.2015.
- */
 public class Homori extends BaseMethod {
     Simplex simplex;
+    int generatingLine;
 
     public Homori(Simplex simplex) {
-        this.coefOfLimits = simplex.coefOfLimits;
-        this.coefOfFunction = simplex.coefOfFunction;
-        this.resultationPoint = simplex.resultationPoint;
-        this.freeVars = simplex.freeVars;
+        setFields(simplex);
 
         int state = simplex.getState();
         if (state == EMPTY_MPR)
@@ -20,9 +15,24 @@ public class Homori extends BaseMethod {
         if (isIntegerSolution()) {
             String message = "Процес припиняється. Отримано розв'язок вихідної задачі";
         } else {
-            int generatingLine = maxOfDoubleParts();
-            //ArrayList<Fraction> limit = new ArrayList<>()
+            generatingLine = maxOfDoubleParts();
+            prepareLimitsAfterAdd();
+            coefOfLimits.add(getNewLimit());
+            Fraction fraction = getNewFreeVar();
+            freeVars.add(getNewFreeVar());
+            ArrayList<Fraction> opinions = simplex.opinions;
+            opinions.add(new Fraction(0));
+
+            DualSimplex dualSimplex = new DualSimplex(coefOfLimits, freeVars, opinions, simplex.valueOfFunction);
+            dualSimplex.getState();
         }
+    }
+
+    private void setFields(BaseMethod method) {
+        this.coefOfLimits = method.coefOfLimits;
+        this.coefOfFunction = method.coefOfFunction;
+        this.resultationPoint = method.resultationPoint;
+        this.freeVars = method.freeVars;
     }
 
     private boolean isIntegerSolution() {
@@ -70,5 +80,27 @@ public class Homori extends BaseMethod {
             }
         }
         return maxIndex;
+    }
+
+    private ArrayList<Fraction> getNewLimit() {
+        ArrayList<Fraction> newLimit = new ArrayList<>();
+        for (int i = 0; i < coefOfLimits.get(generatingLine).size() - 1; i++) {
+            if (coefOfLimits.get(generatingLine).get(i).getDoublePart().compare(Fraction.ZERO) != 0) {
+                newLimit.add(coefOfLimits.get(generatingLine).get(i).getDoublePart().multiply(new Fraction(-1)));
+            } else
+                newLimit.add(new Fraction(0));
+        }
+        newLimit.add(new Fraction(1));
+        return newLimit;
+    }
+
+    private void prepareLimitsAfterAdd() {
+        for (int i = 0; i < coefOfLimits.size(); i++) {
+            coefOfLimits.get(i).add(new Fraction(0));
+        }
+    }
+
+    private Fraction getNewFreeVar() {
+        return freeVars.get(generatingLine).getDoublePart().divide(new Fraction(-1));
     }
 }

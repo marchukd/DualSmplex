@@ -6,6 +6,26 @@ import java.util.List;
 public class DualSimplex extends BaseMethod {
 
     public DualSimplex(ArrayList<ArrayList<Fraction>> _koef_limits, ArrayList<Fraction> _free_vars, ArrayList<Fraction> _koef_of_function, ArrayList<String> signs) {
+        setFields(_koef_limits, _free_vars, _koef_of_function);
+
+        bringingEnterData(signs);
+        initOpinions(_koef_of_function);
+        TASK_STATE = start();
+    }
+
+    public DualSimplex(ArrayList<ArrayList<Fraction>> coefOfLimits, ArrayList<Fraction> freeVars, ArrayList<Fraction> opinions, Fraction valueOfFunction) {
+        this.coefOfLimits = coefOfLimits;
+        LIMIT_COUNT = coefOfLimits.size();
+        VAR_COUNT = coefOfLimits.get(0).size();
+        this.freeVars = freeVars;
+        basis = new ArrayList<>();
+        this.opinions = opinions;
+        this.valueOfFunction = valueOfFunction;
+        bringingEnterData(getSigns());
+        TASK_STATE = start();
+    }
+
+    private void setFields(ArrayList<ArrayList<Fraction>> _koef_limits, ArrayList<Fraction> _free_vars, ArrayList<Fraction> _koef_of_function) {
         coefOfLimits = _koef_limits;
         LIMIT_COUNT = coefOfLimits.size();
         VAR_COUNT = coefOfLimits.get(0).size();
@@ -13,10 +33,6 @@ public class DualSimplex extends BaseMethod {
         basis = new ArrayList<>();
         coefOfFunction = _koef_of_function;
         opinions = new ArrayList<>();
-
-        bringingEnterData(signs);
-        initOpinions(_koef_of_function);
-        TASK_STATE = start();
     }
 
     private void bringingEnterData(List<String> signs) {
@@ -163,5 +179,12 @@ public class DualSimplex extends BaseMethod {
 
     public int getState() {
         return TASK_STATE;
+    }
+
+    private ArrayList<String> getSigns() {
+        ArrayList<String> signs = new ArrayList<>();
+        for (int i = 0; i < freeVars.size(); i++)
+            signs.add(new String("="));
+        return signs;
     }
 }
