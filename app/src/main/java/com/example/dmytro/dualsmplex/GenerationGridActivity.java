@@ -1,7 +1,6 @@
 package com.example.dmytro.dualsmplex;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -143,6 +142,8 @@ public class GenerationGridActivity extends AppCompatActivity implements Button.
 
     private ArrayList<String> getSignsOfLimits() {
         ArrayList<String> signs = new ArrayList<>();
+        if (getIntent().getStringExtra("TYPE").equals(SelectMethodActivity.HOMORI))
+            return signs;
         for (int i = layout.getColumnCount() * 2 - 2; i < layout.getColumnCount() * layout.getRowCount(); i += layout.getColumnCount()) {
             Spinner spinner = (Spinner) layout.getChildAt(i);
             String signItem = spinner.getSelectedItem().toString();
@@ -180,43 +181,44 @@ public class GenerationGridActivity extends AppCompatActivity implements Button.
             ArrayList<Fraction> koef_of_func = getVarsOfFunc();
             ArrayList<String> signs = getSignsOfLimits();
             String method = getIntent().getStringExtra("TYPE");
-            Simplex simplex;
-            DualSimplex dualSimplex;
+
+            String resultMessage = "";
             if (method.equals(SelectMethodActivity.SIMPLEX_METHOD)) {
-                simplex = new Simplex(koeficients, free, koef_of_func);
+                Simplex simplex = new Simplex(koeficients, free, koef_of_func);
                 if (simplex.getState() == Simplex.OK) {
-                    Fraction[] resPoint = simplex.getResultPoint();
-                    StringBuilder resultat = new StringBuilder("x*(");
-                    for (Fraction f : resPoint)
-                        resultat.append(f + ";");
-                    resultat.deleteCharAt(resultat.length() - 1);
-                    resultat.append("); f(x*) = " + simplex.getValueOfFunction());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage(resultat).show();
+                    resultMessage = getResultat(simplex);
                 } else if (simplex.getState() == Simplex.EMPTY_MPR) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("МПР = порожня множина").show();
+                    resultMessage = "МПР = Ø";
                 }
             }
             if (method.equals(SelectMethodActivity.DUAL_SIMPLEX_METHOD)) {
-                dualSimplex = new DualSimplex(koeficients, free, koef_of_func, signs);
+                DualSimplex dualSimplex = new DualSimplex(koeficients, free, koef_of_func, signs);
                 if (dualSimplex.getState() == Simplex.OK) {
-                    Fraction[] resPoint = dualSimplex.getResultPoint();
-                    StringBuilder resultat = new StringBuilder("x*(");
-                    for (Fraction f : resPoint)
-                        resultat.append(f + ";");
-                    resultat.deleteCharAt(resultat.length() - 1);
-                    resultat.append("); f(x*) = " + dualSimplex.getValueOfFunction());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage(resultat).show();
+                    resultMessage = getResultat(dualSimplex);
                 } else if (dualSimplex.getState() == Simplex.EMPTY_MPR) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("МПР = порожня множина").show();
+                    resultMessage = "МПР = Ø";
                 }
             }
-            if(method.equals(SelectMethodActivity.HOMORI)){
-                simplex = new Simplex(koeficients, free, koef_of_func);
+            if (method.equals(SelectMethodActivity.HOMORI)) {
+                Simplex simplex = new Simplex(koeficients, free, koef_of_func);
+                if (simplex.getState() == Simplex.OK) {
+                    Homori homori = new Homori(simplex);
+                    resultMessage = getResultat(homori);
+                } else if (simplex.getState() == Simplex.EMPTY_MPR) {
+                    resultMessage = "МПР = Ø";
+                }
             }
+            new AlertDialog.Builder(this).setMessage(resultMessage).show();
         }
+    }
+
+    String getResultat(BaseMethod baseMethod) {
+        Fraction[] resPoint = baseMethod.resultationPoint;
+        StringBuilder resultat = new StringBuilder("x*(");
+        for (Fraction f : resPoint)
+            resultat.append(f + ";");
+        resultat.deleteCharAt(resultat.length() - 1);
+        resultat.append("); f(x*) = " + baseMethod.valueOfFunction);
+        return resultat.toString();
     }
 }

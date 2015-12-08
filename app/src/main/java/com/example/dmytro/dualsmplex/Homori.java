@@ -12,19 +12,24 @@ public class Homori extends BaseMethod {
         int state = simplex.getState();
         if (state == EMPTY_MPR)
             throw new RuntimeException("МПР вихідної задачі порожня");
-        if (isIntegerSolution()) {
-            String message = "Процес припиняється. Отримано розв'язок вихідної задачі";
-        } else {
-            generatingLine = maxOfDoubleParts();
-            prepareLimitsAfterAdd();
-            coefOfLimits.add(getNewLimit());
-            Fraction fraction = getNewFreeVar();
-            freeVars.add(getNewFreeVar());
-            ArrayList<Fraction> opinions = simplex.opinions;
-            opinions.add(new Fraction(0));
+        while (true) {
+            if (isIntegerSolution()) {
+                String message = "Процес припиняється. Отримано розв'язок вихідної задачі";
+                return;
+            } else {
+                generatingLine = maxOfDoubleParts();
+                prepareLimitsAfterAdd();
+                coefOfLimits.add(getNewLimit());
+                Fraction fraction = getNewFreeVar();
+                freeVars.add(getNewFreeVar());
+                ArrayList<Fraction> opinions = this.opinions;
+                opinions.add(new Fraction(0));
+                basis.add(simplex.VAR_COUNT + 1);
+                VAR_COUNT++;
 
-            DualSimplex dualSimplex = new DualSimplex(coefOfLimits, freeVars, opinions, simplex.valueOfFunction);
-            dualSimplex.getState();
+                DualSimplex dualSimplex = new DualSimplex(coefOfLimits, freeVars, opinions, valueOfFunction, basis);
+                setFields(dualSimplex);
+            }
         }
     }
 
@@ -33,6 +38,11 @@ public class Homori extends BaseMethod {
         this.coefOfFunction = method.coefOfFunction;
         this.resultationPoint = method.resultationPoint;
         this.freeVars = method.freeVars;
+        this.valueOfFunction = method.valueOfFunction;
+        this.opinions = method.opinions;
+        this.basis = method.basis;
+        VAR_COUNT = method.VAR_COUNT;
+        LIMIT_COUNT = method.LIMIT_COUNT;
     }
 
     private boolean isIntegerSolution() {
@@ -67,7 +77,6 @@ public class Homori extends BaseMethod {
         Fraction summaOfDoubleParts = null;
         for (int i = 0; i < indexes.size(); i++) {
             Fraction currentSummaOfDoubleParts = new Fraction(0);
-            maxIndex = 0;
             int currentLimit = indexes.get(i);
             for (int j = 0; j < coefOfLimits.get(currentLimit).size(); j++)
                 currentSummaOfDoubleParts = currentSummaOfDoubleParts.plus(coefOfLimits.get(currentLimit).get(j).getDoublePart());

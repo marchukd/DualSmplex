@@ -41,7 +41,7 @@ public class Simplex extends BaseMethod {
                     zero++;
                 else if (coefOfLimits.get(j).get(i).compare(Fraction.ONE) == 0)
                     one++;
-            if (zero + one == LIMIT_COUNT)
+            if (zero == LIMIT_COUNT - 1)
                 basis.add(i + 1);
         }
     }

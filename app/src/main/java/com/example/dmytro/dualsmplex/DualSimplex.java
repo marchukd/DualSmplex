@@ -13,7 +13,8 @@ public class DualSimplex extends BaseMethod {
         TASK_STATE = start();
     }
 
-    public DualSimplex(ArrayList<ArrayList<Fraction>> coefOfLimits, ArrayList<Fraction> freeVars, ArrayList<Fraction> opinions, Fraction valueOfFunction) {
+    public DualSimplex(ArrayList<ArrayList<Fraction>> coefOfLimits, ArrayList<Fraction> freeVars, ArrayList<Fraction> opinions, Fraction valueOfFunction, ArrayList<Integer> basis) {
+        this.basis = basis;
         this.coefOfLimits = coefOfLimits;
         LIMIT_COUNT = coefOfLimits.size();
         VAR_COUNT = coefOfLimits.get(0).size();
@@ -61,6 +62,8 @@ public class DualSimplex extends BaseMethod {
     }
 
     private void initialBasis() {
+        if (basis != null)
+            return;
         for (int i = 0; i < VAR_COUNT; i++) {
             int zero = 0, one = 0;
             for (int j = 0; j < LIMIT_COUNT; j++)
